@@ -9,7 +9,7 @@ from django.db.models import Q
 from propiedades.models import Propiedad, Comentario, TipoPropiedad, Ubicacion, Servicio
 from propiedades.forms import CustomUserCreationForm, PropiedadForm, ComentarioForm
 
-# --- VISTAS DE AUTENTICACIÓN Y USUARIO ---
+#VISTAS DE AUTENTICACIÓN Y USUARIO
 
 def registro(request):
     """
@@ -22,7 +22,7 @@ def registro(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Asignar grupo según el rol seleccionado
+            #Asignar grupo según el rol seleccionado
             if user.es_agente:
                 group_name = 'Agentes'
             else:
@@ -32,9 +32,9 @@ def registro(request):
                 group = Group.objects.get(name=group_name)
                 user.groups.add(group)
             except Group.DoesNotExist:
-                pass # Si el comando setup_groups no se ha corrido, se manejará después
+                pass #Si el comando setup_groups no se ha corrido, se manejará después
                 
-            # Loguear automáticamente
+            #Loguear automáticamente
             login(request, user)
             messages.success(request, f"¡Registro exitoso! Bienvenido/a, {user.first_name or user.username}.")
             return redirect('propiedad_list')
@@ -61,7 +61,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
-# --- VISTAS DE PROPIEDADES ---
+#VISTAS DE PROPIEDADES
 
 class PropiedadListView(ListView):
     """
@@ -76,7 +76,7 @@ class PropiedadListView(ListView):
     def get_queryset(self):
         queryset = Propiedad.objects.filter(activo=True)
         
-        # Filtros de búsqueda
+        #Filtros de búsqueda no es automatico, denle enter para confirmar la busqueda
         query = self.request.GET.get('q')
         tipo_id = self.request.GET.get('tipo')
         ubicacion_id = self.request.GET.get('ubicacion')
@@ -103,7 +103,7 @@ class PropiedadListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Mantener los parámetros de búsqueda en la paginación
+        #Mantener los parámetros de búsqueda en la paginación
         context['q'] = self.request.GET.get('q', '')
         context['tipo_selected'] = self.request.GET.get('tipo', '')
         context['ubicacion_selected'] = self.request.GET.get('ubicacion', '')
@@ -155,7 +155,7 @@ class PropiedadUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         propiedad = self.get_object()
-        # Tiene permiso o es el agente asignado
+        #Tiene permiso o es el agente asignado
         return self.request.user.has_perm('propiedades.change_propiedad') or propiedad.agente == self.request.user
 
     def get_success_url(self):
@@ -180,11 +180,11 @@ class PropiedadDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return super().post(request, *args, **kwargs)
 
 
-# --- VISTAS DE COMENTARIOS ---
+#VISTAS DE COMENTARIOS
 
 def comentario_create(request, propiedad_id):
     """
-    Crea un comentario. Protegido por login (debe estar autenticado).
+    Crea un comentario. Protegido por login (debe estar autenticado en la pagina).
     """
     if not request.user.is_authenticated:
         messages.error(request, "Debes iniciar sesión para dejar un comentario.")
