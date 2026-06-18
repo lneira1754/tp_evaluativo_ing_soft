@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Panel de Control - Inmobiliaria Don Lucas{% endblock %}
+
+{% block content %}
+<div class="container dashboard-wrapper">
+    <!-- Profile Header Card -->
+    <div class="profile-header-card">
+        <div class="profile-avatar-lg">
+            {{ user.username|slice:":1"|upper }}
+        </div>
+        <div class="profile-info" style="flex: 1;">
+            <span class="profile-badge">
+                {% if user.is_superuser %}
+                    Administrador de Plataforma
+                {% elif user.es_agente or user.is_staff %}
+                    Agente Inmobiliario
+                {% else %}
+                    Cliente Registrado
+                {% endif %}
+            </span>
+            <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+            <p style="font-size: 1.1rem; color: rgba(244, 241, 222, 0.9);">@{{ user.username }}</p>
+            
+            {% if user.biografia %}
+                <p class="profile-bio">"{{ user.biografia }}"</p>
+            {% else %}
+                <p class="profile-bio" style="font-style: italic; opacity: 0.6;">Sin biografía ingresada.</p>
+            {% endif %}
+
+            <div class="profile-meta-grid">
+                <div>✉️ <strong>Email:</strong> {{ user.email }}</div>
+                {% if user.telefono %}
+                    <div>📞 <strong>Teléfono:</strong> {{ user.telefono }}</div>
+                {% endif %}
+                <div>📅 <strong>Miembro desde:</strong> {{ user.date_joined|date:"d M Y" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conditional Views by Role -->
+    {% if user.es_agente or user.is_staff %}
+        <!-- Agent View: Mis Propiedades Publicadas -->
+        <div class="section-header">
+            <h2 class="section-title">Mis Propiedades Publicadas ({{ mis_propiedades.count }})</h2>
+            <a href="{% url 'propiedad_create' %}" class="btn btn-secondary">+ Publicar Nueva Propiedad</a>
+        </div>
+
+        <div style="background-color: white; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-subtle); border: 1px solid rgba(61, 64, 91, 0.05); margin-bottom: 40px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                <thead>
+                    <tr style="background-color: var(--twilight-indigo); color: var(--eggshell); font-family: var(--font-heading);">
+                        <th style="padding: 15px 20px;">Propiedad</th>
+                        <th style="padding: 15px 20px;">Ubicación</th>
+                        <th style="padding: 15px 20px;">Precio (USD)</th>
+                        <th style="padding: 15px 20px;">Estado</th>
+                        <th style="padding: 15px 20px; text-align: right;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for propiedad in mis_propiedades %}
+                        <tr style="border-bottom: 1px solid rgba(61, 64, 91, 0.08); transition: var(--transition-smooth);" onmouseover="this.style.backgroundColor='#faf9f6'" onmouseout="this.style.backgroundColor='transparent'">
+                            <td style="padding: 15px 20px; font-weight: 600;">
+                                <a href="{% url 'propiedad_detail' propiedad.pk %}" style="color: var(--twilight-indigo);">{{ propiedad.titulo }}</a>
+                            </td>
+                            <td style="padding: 15px 20px; color: var(--text-muted);">
+                                {{ propiedad.ubicacion.barrio }}, {{ propiedad.ubicacion.ciudad }}
+                            </td>
+                            <td style="padding: 15px 20px; font-weight: 700; color: var(--muted-teal);">
+                                ${{ propiedad.precio }}
+                            </td>
+                            <td style="padding: 15px 20px;">
+                                {% if propiedad.activo %}
+                                    <span style="background-color: rgba(129, 178, 154, 0.15); color: #386b52; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">Activo</span>
+                                {% else %}
+                                    <span style="background-color: rgba(231, 111, 81, 0.15); color: #a7371b; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 15px 20px; text-align: right; display: flex; gap: 15px; justify-content: flex-end; align-items: center;">
+                                <a href="{% url 'propiedad_detail' propiedad.pk %}" class="action-link">👁️ Ver</a>
+                                <a href="{% url 'propiedad_update' propiedad.pk %}" class="action-link">✏️ Editar</a>
+                                <a href="{% url 'propiedad_delete' propiedad.pk %}" class="action-link action-link-danger">🗑️ Borrar</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                                <span style="font-size: 2.5rem;">🏡</span>
+                                <p style="margin-top: 10px; font-weight: 600;">Aún no has publicado ninguna propiedad.</p>
+                                <a href="{% url 'propiedad_create' %}" class="btn btn-primary" style="margin-top: 15px; padding: 8px 20px;">Crear Mi Primera Publicación</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <!-- Client View: Mis Comentarios Escritos -->
+        <div class="section-header">
+            <h2 class="section-title">Mis Comentarios y Consultas ({{ mis_comentarios.count }})</h2>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px;">
+            {% for comentario in mis_comentarios %}
+                <div style="background-color: white; border-radius: var(--radius-lg); padding: 20px; border: 1.5px solid var(--apricot-cream); box-shadow: var(--shadow-subtle);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid rgba(61, 64, 91, 0.05); padding-bottom: 10px;">
+                        <div>
+                            Comentado en la propiedad: 
+                            <strong>
+                                <a href="{% url 'propiedad_detail' comentario.propiedad.pk %}" style="color: var(--twilight-indigo);">
+                                    {{ comentario.propiedad.titulo }}
+                                </a>
+                            </strong>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 15px;">
+                            <span>{{ comentario.fecha_creacion|date:"d M Y, H:i" }}</span>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="{% url 'comentario_update' comentario.pk %}" class="action-link" title="Editar">✏️ Editar</a>
+                                <a href="{% url 'comentario_delete' comentario.pk %}" class="action-link action-link-danger" title="Eliminar">🗑️ Borrar</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.95rem; font-style: italic; color: var(--text-main);">
+                        "{{ comentario.contenido }}"
+                    </div>
+                </div>
+            {% empty %}
+                <div style="text-align: center; padding: 40px; background: white; border-radius: var(--radius-lg); border: 1px solid rgba(61, 64, 91, 0.05);">
+                    <span style="font-size: 2.5rem;">💬</span>
+                    <p style="margin-top: 10px; color: var(--text-muted);">No has dejado ningún comentario todavía.</p>
+                    <a href="{% url 'propiedad_list' %}" class="btn btn-primary" style="margin-top: 15px;">Explorar Propiedades para comentar</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

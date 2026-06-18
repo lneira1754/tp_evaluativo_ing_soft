@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Propiedad - Inmobiliaria Don Lucas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-page-wrapper" style="max-width: 500px; text-align: center;">
+        <span style="font-size: 3.5rem;">⚠️</span>
+        <h2 class="form-page-title" style="margin-top: 15px;">¿Eliminar Propiedad?</h2>
+        <p class="form-page-subtitle" style="margin-bottom: 25px;">
+            Estás a punto de eliminar la publicación de <strong>"{{ object.titulo }}"</strong>. Esta acción no se puede deshacer y borrará todos los comentarios relacionados.
+        </p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" style="width: 100%; padding: 12px; margin-bottom: 12px;">Sí, Eliminar Publicación</button>
+            <a href="{% url 'propiedad_detail' object.pk %}" class="btn btn-outline-indigo" style="display: block; width: 100%; padding: 12px; text-align: center;">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ propiedad.titulo }} - Inmobiliaria Don Lucas{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 30px;">
+    <!-- Breadcrumb / Back button -->
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <a href="{% url 'propiedad_list' %}" class="btn btn-outline-indigo" style="padding: 8px 16px; font-size: 0.9rem;">&larr; Volver al Catálogo</a>
+        
+        {% if user.is_authenticated %}
+            <div style="display: flex; gap: 10px;">
+                {% if user == propiedad.agente or user.is_staff or perms.propiedades.change_propiedad %}
+                    <a href="{% url 'propiedad_update' propiedad.pk %}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">✏️ Editar Propiedad</a>
+                {% endif %}
+                {% if user == propiedad.agente or user.is_staff or perms.propiedades.delete_propiedad %}
+                    <a href="{% url 'propiedad_delete' propiedad.pk %}" class="btn btn-danger" style="padding: 8px 16px; font-size: 0.9rem;">🗑️ Eliminar Propiedad</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Main Detail Grid -->
+    <div class="detail-grid">
+        <!-- Left Side: Main Property Info -->
+        <div>
+            <div class="detail-main-img-wrapper">
+                {% if propiedad.imagen %}
+                    <img src="{{ propiedad.imagen.url }}" alt="{{ propiedad.titulo }}" class="detail-main-img">
+                {% else %}
+                    <div class="detail-main-img" style="background-color: #ddd; display: flex; align-items: center; justify-content: center;">Sin Imagen</div>
+                {% endif %}
+            </div>
+
+            <!-- Title & Price -->
+            <div class="detail-title-section">
+                <div>
+                    <h2 class="detail-title">{{ propiedad.titulo }}</h2>
+                    <div class="detail-meta">
+                        <span class="detail-badge">🏡 {{ propiedad.tipo.nombre }}</span>
+                        <span class="detail-badge">📍 {{ propiedad.ubicacion.barrio }}, {{ propiedad.ubicacion.ciudad }} ({{ propiedad.ubicacion.provincia }})</span>
+                        <span class="detail-badge">📅 Publicada: {{ propiedad.fecha_creacion|date:"d M Y" }}</span>
+                    </div>
+                </div>
+                <div class="detail-price">
+                    USD {{ propiedad.precio }}
+                </div>
+            </div>
+
+            <!-- Specs Bar -->
+            <div class="detail-specs">
+                <div class="detail-spec-item">
+                    <div class="detail-spec-val">📐 {{ propiedad.superficie }}</div>
+                    <div class="detail-spec-label">m² Totales</div>
+                </div>
+                <div class="detail-spec-item">
+                    <div class="detail-spec-val">🛏️ {{ propiedad.habitaciones }}</div>
+                    <div class="detail-spec-label">Habitaciones</div>
+                </div>
+                <div class="detail-spec-item">
+                    <div class="detail-spec-val">🚿 {{ propiedad.banos }}</div>
+                    <div class="detail-spec-label">Baños</div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="detail-card">
+                <h3>Descripción</h3>
+                <p style="white-space: pre-line; line-height: 1.8; color: var(--text-main);">
+                    {{ propiedad.descripcion }}
+                </p>
+            </div>
+
+            <!-- Amenities / Services -->
+            {% if propiedad.servicios.all %}
+                <div class="detail-card">
+                    <h3>Comodidades y Servicios</h3>
+                    <div class="servicios-list">
+                        {% for servicio in propiedad.servicios.all %}
+                            <div class="servicio-item">
+                                <span class="servicio-icono">{{ servicio.icono|default:"✔️" }}</span>
+                                <span>{{ servicio.nombre }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Comments Section -->
+            <div class="detail-card">
+                <div class="comment-section-header">
+                    <h3>Comentarios y Preguntas ({{ comentarios.count }})</h3>
+                </div>
+
+                <!-- Comment list -->
+                <div class="comment-list">
+                    {% for comentario in comentarios %}
+                        <div class="comment-item">
+                            <div class="comment-meta">
+                                <div class="comment-author-info">
+                                    <div class="agent-avatar" style="background-color: var(--apricot-cream); color: var(--twilight-indigo); font-weight: 700; width: 32px; height: 32px; font-size: 0.85rem;">
+                                        {{ comentario.autor.username|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <span class="comment-author-name">{{ comentario.autor.first_name|default:comentario.autor.username }}</span>
+                                        {% if comentario.autor.es_agente or comentario.autor.is_staff %}
+                                            <span style="background-color: var(--burnt-peach); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; margin-left: 5px; font-weight: bold; text-transform: uppercase;">Agente</span>
+                                        {% endif %}
+                                        {% if comentario.autor == propiedad.agente %}
+                                            <span style="background-color: var(--twilight-indigo); color: var(--eggshell); font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; margin-left: 5px; font-weight: bold; text-transform: uppercase;">Propietario</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <span class="comment-date">{{ comentario.fecha_creacion|date:"d M Y, H:i" }}</span>
+                                    {% if user.is_authenticated %}
+                                        <div class="comment-actions">
+                                            {% if user == comentario.autor or user.is_staff or perms.propiedades.change_comentario %}
+                                                <a href="{% url 'comentario_update' comentario.pk %}" class="action-link" title="Editar">✏️</a>
+                                            {% endif %}
+                                            {% if user == comentario.autor or user.is_staff or perms.propiedades.delete_comentario %}
+                                                <a href="{% url 'comentario_delete' comentario.pk %}" class="action-link action-link-danger" title="Eliminar">🗑️</a>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="comment-content">
+                                <p>{{ comentario.contenido }}</p>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No hay comentarios sobre esta propiedad aún. ¡Sé el primero en preguntar!</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Add Comment Form -->
+                {% if user.is_authenticated %}
+                    <div class="comment-form-card">
+                        <h4 class="comment-form-title">Deja tu comentario o consulta</h4>
+                        <form method="post" action="{% url 'comentario_create' propiedad.id %}">
+                            {% csrf_token %}
+                            <p>
+                                {{ comentario_form.contenido }}
+                            </p>
+                            <button type="submit" class="btn btn-secondary" style="margin-top: 15px; padding: 10px 20px;">Publicar Comentario</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div style="background-color: var(--eggshell); padding: 20px; border-radius: var(--radius-md); text-align: center; border: 1.5px dashed var(--twilight-indigo);">
+                        <p style="font-weight: 600; color: var(--twilight-indigo);">¿Tienes alguna duda sobre esta propiedad?</p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Debes iniciar sesión para comentar en las casas que estén listadas.</p>
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary" style="padding: 8px 20px;">Iniciar Sesión</a>
+                        <span style="margin: 0 10px; color: var(--text-muted); font-size: 0.9rem;">o</span>
+                        <a href="{% url 'registro' %}" class="btn btn-outline-indigo" style="padding: 8px 20px;">Registrarme</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Side: Sidebar Agent details -->
+        <aside>
+            <div class="agent-card">
+                <div class="agent-profile-avatar">
+                    {{ propiedad.agente.username|slice:":1"|upper }}
+                </div>
+                <h3 class="agent-name">{{ propiedad.agente.first_name }} {{ propiedad.agente.last_name }}</h3>
+                <div class="agent-role">
+                    {% if propiedad.agente.is_superuser %}
+                        Administrador
+                    {% else %}
+                        Agente Inmobiliario
+                    {% endif %}
+                </div>
+                
+                {% if propiedad.agente.biografia %}
+                    <p style="font-size: 0.9rem; color: rgba(244, 241, 222, 0.8); margin-bottom: 20px; font-style: italic; line-height: 1.5;">
+                        "{{ propiedad.agente.biografia }}"
+                    </p>
+                {% endif %}
+
+                <div class="agent-details">
+                    {% if propiedad.agente.telefono %}
+                        <div class="agent-detail-line">
+                            <strong>📞 Teléfono:</strong><br>{{ propiedad.agente.telefono }}
+                        </div>
+                    {% endif %}
+                    <div class="agent-detail-line">
+                        <strong>✉️ Correo:</strong><br>{{ propiedad.agente.email }}
+                    </div>
+                </div>
+
+                <p style="font-size: 0.8rem; color: rgba(244, 241, 222, 0.6);">
+                    Al contactar, indícale que viste la propiedad "{{ propiedad.titulo }}" en Inmobiliaria Don Lucas.
+                </p>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Editar Propiedad - {{ object.titulo }}{% else %}Publicar Propiedad - Inmobiliaria Don Lucas{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-page-wrapper" style="max-width: 700px; margin: 40px auto;">
+        <h2 class="form-page-title">
+            {% if object %}Editar Propiedad{% else %}Publicar Propiedad{% endif %}
+        </h2>
+        <p class="form-page-subtitle">
+            {% if object %}Modifica los datos de la propiedad seleccionada{% else %}Completa el formulario para publicar una nueva propiedad en la plataforma{% endif %}
+        </p>
+        
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <ul class="errorlist">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            
+            {% for field in form %}
+                <p>
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <span class="helptext">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </p>
+            {% endfor %}
+            
+            <div style="display: flex; gap: 15px; margin-top: 25px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1; padding: 12px;">
+                    {% if object %}Guardar Cambios{% else %}Publicar Propiedad{% endif %}
+                </button>
+                <a href="{% if object %}{% url 'propiedad_detail' object.pk %}{% else %}{% url 'propiedad_list' %}{% endif %}" class="btn btn-outline-indigo" style="flex: 1; padding: 12px; text-align: center;">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

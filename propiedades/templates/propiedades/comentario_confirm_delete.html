@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Comentario - Inmobiliaria Don Lucas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-page-wrapper" style="max-width: 500px; text-align: center;">
+        <span style="font-size: 3.5rem;">🗑️</span>
+        <h2 class="form-page-title" style="margin-top: 15px;">¿Eliminar Comentario?</h2>
+        <p class="form-page-subtitle" style="margin-bottom: 25px;">
+            Estás a punto de borrar tu comentario en la publicación <strong>"{{ object.propiedad.titulo }}"</strong>. Esta acción no se puede deshacer.
+        </p>
+        
+        <div style="background-color: var(--bg-light); border: 1.5px solid var(--apricot-cream); padding: 15px; border-radius: var(--radius-md); text-align: left; margin-bottom: 25px; font-size: 0.95rem; font-style: italic;">
+            "{{ object.contenido }}"
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" style="width: 100%; padding: 12px; margin-bottom: 12px;">Sí, Eliminar Comentario</button>
+            <a href="{% url 'propiedad_detail' object.propiedad.pk %}" class="btn btn-outline-indigo" style="display: block; width: 100%; padding: 12px; text-align: center;">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

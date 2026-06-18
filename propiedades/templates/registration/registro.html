@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear una Cuenta - Inmobiliaria Don Lucas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-page-wrapper">
+        <h2 class="form-page-title">Crea tu Cuenta</h2>
+        <p class="form-page-subtitle">Únete a Inmobiliaria Don Lucas para comentar propiedades y contactar agentes</p>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <ul class="errorlist">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            
+            {% for field in form %}
+                <p>
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <span class="helptext">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </p>
+            {% endfor %}
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px; padding: 12px;">Registrarme</button>
+        </form>
+        
+        <div class="form-page-footer">
+            ¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia Sesión aquí</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

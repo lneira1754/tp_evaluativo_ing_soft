@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Catálogo de Propiedades - Inmobiliaria Don Lucas{% endblock %}
+
+{% block content %}
+<!-- Hero / Banner Section -->
+<section class="hero-section">
+    <div class="container hero-content">
+        <h1 class="hero-title">Encuentra tu <span>Hogar Ideal</span></h1>
+        <p class="hero-subtitle">Explora los departamentos más exclusivos y las casas más confortables del mercado</p>
+    </div>
+</section>
+
+<!-- Search Filters Card -->
+<div class="container">
+    <div class="search-card">
+        <form method="get" action="{% url 'propiedad_list' %}" class="search-form">
+            <!-- Texto de búsqueda -->
+            <div class="form-group">
+                <label for="search-input">Buscar</label>
+                <input type="text" name="q" id="search-input" class="form-control" placeholder="Ej: Duplex, Palermo..." value="{{ q }}">
+            </div>
+            
+            <!-- Tipo -->
+            <div class="form-group">
+                <label for="tipo-select">Tipo</label>
+                <select name="tipo" id="tipo-select" class="form-control">
+                    <option value="">Todos los tipos</option>
+                    {% for tipo in global_tipos %}
+                        <option value="{{ tipo.id }}" {% if tipo_selected == tipo.id|stringformat:"i" %}selected{% endif %}>{{ tipo.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- Ubicación -->
+            <div class="form-group">
+                <label for="ubicacion-select">Zona</label>
+                <select name="ubicacion" id="ubicacion-select" class="form-control">
+                    <option value="">Todas las zonas</option>
+                    {% for ubicacion in global_ubicaciones %}
+                        <option value="{{ ubicacion.id }}" {% if ubicacion_selected == ubicacion.id|stringformat:"i" %}selected{% endif %}>{{ ubicacion.barrio }} ({{ ubicacion.ciudad }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Precio Máximo -->
+            <div class="form-group">
+                <label for="precio-max-input">Precio Máx (USD)</label>
+                <input type="number" name="precio_max" id="precio-max-input" class="form-control" placeholder="Monto Máx" value="{{ precio_max }}">
+            </div>
+
+            <!-- Botón Buscar -->
+            <div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; height: 48px;">🔍 Buscar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Main Property List -->
+<div class="container" style="margin-bottom: 60px;">
+    <div class="section-header">
+        <h2 class="section-title">Publicaciones Destacadas</h2>
+        {% if user.is_authenticated and user.es_agente or user.is_staff %}
+            <a href="{% url 'propiedad_create' %}" class="btn btn-secondary">+ Publicar Propiedad</a>
+        {% endif %}
+    </div>
+
+    <!-- Properties Grid -->
+    <div class="property-grid">
+        {% for propiedad in propiedades %}
+            <article class="property-card">
+                <div class="property-card-img-wrapper">
+                    {% if propiedad.imagen %}
+                        <img src="{{ propiedad.imagen.url }}" alt="{{ propiedad.titulo }}" class="property-card-img">
+                    {% else %}
+                        <div class="property-card-img" style="background-color: #ddd; display: flex; align-items: center; justify-content: center;">Sin Imagen</div>
+                    {% endif %}
+                    <span class="property-badge-type">{{ propiedad.tipo.nombre }}</span>
+                    <span class="property-badge-price">USD {{ propiedad.precio }}</span>
+                </div>
+                
+                <div class="property-card-content">
+                    <div class="property-card-location">
+                        <span>📍</span> {{ propiedad.ubicacion.barrio }}, {{ propiedad.ubicacion.ciudad }}
+                    </div>
+                    <h3 class="property-card-title">
+                        <a href="{% url 'propiedad_detail' propiedad.pk %}">{{ propiedad.titulo }}</a>
+                    </h3>
+                    
+                    <div class="property-card-specs">
+                        <div class="spec-item">📐 <span>{{ propiedad.superficie }} m²</span></div>
+                        <div class="spec-item">🛏️ <span>{{ propiedad.habitaciones }} dorms</span></div>
+                        <div class="spec-item">🚿 <span>{{ propiedad.banos }} baños</span></div>
+                    </div>
+                    
+                    <div class="property-card-footer">
+                        <div class="agent-info">
+                            <div class="agent-avatar">{{ propiedad.agente.username|slice:":1"|upper }}</div>
+                            <span>{{ propiedad.agente.first_name|default:propiedad.agente.username }}</span>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            {% if user.is_authenticated %}
+                                {% if user == propiedad.agente or user.is_staff or perms.propiedades.change_propiedad %}
+                                    <a href="{% url 'propiedad_update' propiedad.pk %}" class="action-link" title="Editar">✏️ Editar</a>
+                                {% endif %}
+                                {% if user == propiedad.agente or user.is_staff or perms.propiedades.delete_propiedad %}
+                                    <a href="{% url 'propiedad_delete' propiedad.pk %}" class="action-link action-link-danger" title="Eliminar">🗑️ Borrar</a>
+                                {% endif %}
+                            {% endif %}
+                            <a href="{% url 'propiedad_detail' propiedad.pk %}" class="btn btn-outline-indigo" style="padding: 6px 12px; font-size: 0.85rem; border-radius: var(--radius-sm);">Ver más</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <div style="grid-column: span 3; text-align: center; padding: 50px 0; background: white; border-radius: var(--radius-lg); border: 1px solid rgba(61, 64, 91, 0.05);">
+                <span style="font-size: 3rem;">🏡</span>
+                <h3 style="margin-top: 15px;">No se encontraron propiedades</h3>
+                <p style="color: var(--text-muted); margin-top: 5px;">Prueba ajustando los filtros de búsqueda o eliminando palabras clave.</p>
+                {% if q or tipo_selected or ubicacion_selected or precio_max %}
+                    <a href="{% url 'propiedad_list' %}" class="btn btn-primary" style="margin-top: 15px;">Ver Todas las Propiedades</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if q %}&q={{ q }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}{% if ubicacion_selected %}&ubicacion={{ ubicacion_selected }}{% endif %}{% if precio_max %}&precio_max={{ precio_max }}{% endif %}" class="page-num">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}{% if ubicacion_selected %}&ubicacion={{ ubicacion_selected }}{% endif %}{% if precio_max %}&precio_max={{ precio_max }}{% endif %}" class="page-num">&lsaquo; Prev</a>
+            {% endif %}
+
+            <span class="page-num active">{{ page_obj.number }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}{% if ubicacion_selected %}&ubicacion={{ ubicacion_selected }}{% endif %}{% if precio_max %}&precio_max={{ precio_max }}{% endif %}" class="page-num">Next &rsaquo;</a>
+                <a href="?page={{ page_obj.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}{% if ubicacion_selected %}&ubicacion={{ ubicacion_selected }}{% endif %}{% if precio_max %}&precio_max={{ precio_max }}{% endif %}" class="page-num">Last &raquo;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
