@@ -10,10 +10,10 @@ class Command(BaseCommand):
     help = 'Crea datos de prueba iniciales (Tipos, Ubicaciones, Servicios) y un administrador por defecto.'
 
     def handle(self, *args, **options):
-        # 0. Crear grupos y permisos por defecto
+        #0. Crear grupos y permisos por defecto
         call_command('setup_groups')
 
-        # 1. Crear Superusuario por defecto si no existe
+        #1. Crear Superusuario por defecto si no existe
         if not User.objects.filter(username='admin').exists():
             admin_user = User.objects.create_superuser(
                 username='admin',
@@ -28,7 +28,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.WARNING('El superusuario "admin" ya existe.'))
 
-        # 2. Crear Tipos de Propiedades
+        #2. Crear Tipos de Propiedades
         tipos = [
             ("Casa", "Propiedades residenciales unifamiliares con patio o jardín."),
             ("Departamento", "Unidades residenciales en edificios multifamiliares."),
@@ -41,7 +41,7 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(self.style.SUCCESS(f'Tipo creado: {nombre}'))
 
-        # 3. Crear Ubicaciones de prueba
+        #3. Crear Ubicaciones de prueba
         ubicaciones = [
             ("Centro", "Río Cuarto", "Córdoba"),
             ("Banda Norte", "Río Cuarto", "Córdoba"),
@@ -58,7 +58,7 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(self.style.SUCCESS(f'Ubicación creada: {barrio}, {ciudad}'))
 
-        # 4. Crear Servicios / Amenities con iconos emoji
+        #4. Crear Servicios / Amenities con iconos emoji
         servicios = [
             ("Piscina", "🏊"),
             ("Cochera", "🚗"),

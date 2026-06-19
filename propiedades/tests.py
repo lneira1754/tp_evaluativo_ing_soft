@@ -11,12 +11,12 @@ from django.core.management import call_command
 
 class InmobiliariaTestCase(TestCase):
     def setUp(self):
-        # 1. Ejecutar configuraciones iniciales de grupos
+        #1. Ejecutar configuraciones iniciales de grupos
         call_command('setup_groups')
         self.agentes_group = Group.objects.get(name='Agentes')
         self.clientes_group = Group.objects.get(name='Clientes')
         
-        # 2. Crear usuarios
+        #2. Crear usuarios
         self.agente_user = User.objects.create_user(
             username='agente1',
             email='agente1@test.com',
@@ -37,13 +37,13 @@ class InmobiliariaTestCase(TestCase):
         )
         self.cliente_user.groups.add(self.clientes_group)
 
-        # 3. Crear auxiliares de modelos
+        #3. Crear auxiliares de modelos
         self.tipo_casa = TipoPropiedad.objects.create(nombre="Casa", descripcion="Residencial")
         self.ubicacion_rio_cuarto = Ubicacion.objects.create(barrio="Centro", ciudad="Río Cuarto", provincia="Córdoba")
         self.servicio_wifi = Servicio.objects.create(nombre="Wi-Fi", icono="📶")
 
-        # 4. Crear propiedad de prueba
-        # Creamos una imagen pequeña en memoria para testear la subida
+        #4. Crear propiedad de prueba
+        #Creamos una imagen pequeña en memoria para testear la subida
         small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00'
             b'\xff\xff\xff\x21\xf9\x04\x01\x00\x00\x00\x00\x2c\x00\x00\x00\x00'
@@ -75,12 +75,12 @@ class InmobiliariaTestCase(TestCase):
 
     def test_public_views_accessible(self):
         """Verifica que los usuarios sin registrar puedan ver la lista de propiedades y el detalle."""
-        # Lista
+        #Lista
         response_list = self.client.get(reverse('propiedad_list'))
         self.assertEqual(response_list.status_code, 200)
         self.assertContains(response_list, "Hermosa Casa Centro")
 
-        # Detalle
+        #Detalle
         response_detail = self.client.get(reverse('propiedad_detail', args=[self.propiedad.pk]))
         self.assertEqual(response_detail.status_code, 200)
         self.assertContains(response_detail, "Una casa espectacular")
@@ -95,13 +95,13 @@ class InmobiliariaTestCase(TestCase):
 
     def test_registered_user_can_comment(self):
         """Verifica que un usuario cliente registrado pueda comentar en una propiedad."""
-        # Iniciar sesión
+        #Iniciar sesión
         self.client.login(username='cliente1', password='password123')
         
         response = self.client.post(reverse('comentario_create', args=[self.propiedad.pk]), {
             'contenido': 'Me interesa mucho esta casa, ¿cuándo se puede visitar?'
         })
-        # Redirige de vuelta al detalle de la propiedad
+        #Redirige de vuelta al detalle de la propiedad
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Comentario.objects.count(), 1)
         
@@ -113,8 +113,8 @@ class InmobiliariaTestCase(TestCase):
         """Verifica que un usuario cliente (sin el permiso add_propiedad) no pueda crear una propiedad."""
         self.client.login(username='cliente1', password='password123')
         response = self.client.get(reverse('propiedad_create'))
-        # Debería retornar un HTTP 403 Forbidden o redirigir según configuración (LoginRequired/PermissionRequired)
-        # En Django, PermissionRequiredMixin retorna 403 por defecto para usuarios logueados sin el permiso.
+        #Debería retornar un HTTP 403 Forbidden o redirigir según configuración (LoginRequired/PermissionRequired)
+        #En Django, PermissionRequiredMixin retorna 403 por defecto para usuarios logueados sin el permiso.
         self.assertEqual(response.status_code, 403)
 
     def test_authorized_user_can_create_property(self):
@@ -138,11 +138,11 @@ class InmobiliariaTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 302)
         
-        # Verificar que el usuario se haya creado
+        #Verificar que el usuario se haya creado
         user_exists = User.objects.filter(username='nuevousuario').exists()
         self.assertTrue(user_exists)
         
-        # Verificar la asignación de grupos
+        #Verificar la asignación de grupos
         user = User.objects.get(username='nuevousuario')
         self.assertTrue(user.es_agente)
         self.assertTrue(user.groups.filter(name='Agentes').exists())

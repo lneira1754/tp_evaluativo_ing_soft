@@ -5,6 +5,7 @@ class CustomUser(AbstractUser):
     telefono = models.CharField(max_length=20, blank=True, null=True, verbose_name="Teléfono")
     biografia = models.TextField(blank=True, null=True, verbose_name="Biografía / Presentación")
     es_agente = models.BooleanField(default=False, verbose_name="Es Agente Inmobiliario")
+    foto_perfil = models.ImageField(upload_to='perfiles/', blank=True, null=True, verbose_name="Foto de Perfil")
 
     def __str__(self):
         return f"{self.username} ({'Agente' if self.es_agente or self.is_staff else 'Cliente'})"

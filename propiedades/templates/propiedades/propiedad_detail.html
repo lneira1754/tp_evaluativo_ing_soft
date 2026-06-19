@@ -98,9 +98,15 @@
                         <div class="comment-item">
                             <div class="comment-meta">
                                 <div class="comment-author-info">
-                                    <div class="agent-avatar" style="background-color: var(--apricot-cream); color: var(--twilight-indigo); font-weight: 700; width: 32px; height: 32px; font-size: 0.85rem;">
-                                        {{ comentario.autor.username|slice:":1"|upper }}
-                                    </div>
+                                    {% if comentario.autor.foto_perfil %}
+                                        <div class="agent-avatar" style="overflow: hidden; padding: 0; width: 32px; height: 32px; border-radius: 50%;">
+                                            <img src="{{ comentario.autor.foto_perfil.url }}" alt="{{ comentario.autor.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                    {% else %}
+                                        <div class="agent-avatar" style="background-color: var(--apricot-cream); color: var(--twilight-indigo); font-weight: 700; width: 32px; height: 32px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                            {{ comentario.autor.username|slice:":1"|upper }}
+                                        </div>
+                                    {% endif %}
                                     <div>
                                         <span class="comment-author-name">{{ comentario.autor.first_name|default:comentario.autor.username }}</span>
                                         {% if comentario.autor.es_agente or comentario.autor.is_staff %}
@@ -160,10 +166,16 @@
 
         <!-- Right Side: Sidebar Agent details -->
         <aside>
-            <div class="agent-card">
-                <div class="agent-profile-avatar">
-                    {{ propiedad.agente.username|slice:":1"|upper }}
-                </div>
+             <div class="agent-card">
+                 {% if propiedad.agente.foto_perfil %}
+                     <div class="agent-profile-avatar" style="overflow: hidden; padding: 0;">
+                         <img src="{{ propiedad.agente.foto_perfil.url }}" alt="{{ propiedad.agente.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+                     </div>
+                 {% else %}
+                     <div class="agent-profile-avatar">
+                         {{ propiedad.agente.username|slice:":1"|upper }}
+                     </div>
+                 {% endif %}
                 <h3 class="agent-name">{{ propiedad.agente.first_name }} {{ propiedad.agente.last_name }}</h3>
                 <div class="agent-role">
                     {% if propiedad.agente.is_superuser %}

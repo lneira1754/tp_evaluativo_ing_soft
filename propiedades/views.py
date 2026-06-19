@@ -19,7 +19,7 @@ def registro(request):
         return redirect('propiedad_list')
         
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
             #Asignar grupo según el rol seleccionado

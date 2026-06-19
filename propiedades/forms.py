@@ -9,10 +9,11 @@ class CustomUserCreationForm(UserCreationForm):
     telefono = forms.CharField(max_length=20, required=False, label="Teléfono de Contacto")
     biografia = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=False, label="Biografía / Presentación")
     es_agente = forms.BooleanField(required=False, label="Registrarse como Agente Inmobiliario (Permite publicar propiedades)")
+    foto_perfil = forms.ImageField(required=False, label="Foto de Perfil")
 
     class Meta(UserCreationForm.Meta):
         model = CustomUser
-        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email', 'telefono', 'biografia', 'es_agente')
+        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email', 'telefono', 'biografia', 'es_agente', 'foto_perfil')
 
 
 class PropiedadForm(forms.ModelForm):

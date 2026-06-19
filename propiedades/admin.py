@@ -49,7 +49,7 @@ class PropiedadAdmin(admin.ModelAdmin):
     list_filter = ('activo', 'tipo', 'ubicacion', 'fecha_creacion', 'agente')
     search_fields = ('titulo', 'descripcion', 'ubicacion__barrio', 'ubicacion__ciudad', 'agente__username')
     ordering = ('-fecha_creacion', 'precio')
-    filter_horizontal = ('servicios',)  # Para una mejor selección de comodidades (Relacion muchos a muchos)
+    filter_horizontal = ('servicios',)  #Para una mejor selección de comodidades (Relacion muchos a muchos)
 
 
 #Registro de Comentario
