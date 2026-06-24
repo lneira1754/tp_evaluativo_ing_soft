@@ -155,8 +155,12 @@ class PropiedadUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         propiedad = self.get_object()
-        #Tiene permiso o es el agente asignado
-        return self.request.user.has_perm('propiedades.change_propiedad') or propiedad.agente == self.request.user
+        user = self.request.user
+        #Superusuarios y staff pueden editar cualquier propiedad
+        if user.is_superuser or user.is_staff:
+            return True
+        #Agentes solo pueden editar sus propias propiedades
+        return user.has_perm('propiedades.change_propiedad') and propiedad.agente == user
 
     def get_success_url(self):
         messages.success(self.request, "Propiedad actualizada correctamente.")
@@ -173,7 +177,12 @@ class PropiedadDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         propiedad = self.get_object()
-        return self.request.user.has_perm('propiedades.delete_propiedad') or propiedad.agente == self.request.user
+        user = self.request.user
+        #Superusuarios y staff pueden borrar cualquier propiedad
+        if user.is_superuser or user.is_staff:
+            return True
+        #Agentes solo pueden borrar sus propias propiedades
+        return user.has_perm('propiedades.delete_propiedad') and propiedad.agente == user
 
     def post(self, request, *args, **kwargs):
         messages.success(self.request, "Propiedad eliminada con éxito.")

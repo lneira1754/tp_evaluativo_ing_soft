@@ -146,3 +146,25 @@ class InmobiliariaTestCase(TestCase):
         user = User.objects.get(username='nuevousuario')
         self.assertTrue(user.es_agente)
         self.assertTrue(user.groups.filter(name='Agentes').exists())
+
+    def test_agent_cannot_edit_or_delete_other_agent_property(self):
+        """Verifica que un agente no pueda editar ni borrar la propiedad de otro agente."""
+        #Creamos el segundo agente
+        agente2 = User.objects.create_user(
+            username='agente2',
+            email='agente2@test.com',
+            password='password123',
+            es_agente=True
+        )
+        agente2.groups.add(self.agentes_group)
+        
+        #Iniciamos sesión como agente2
+        self.client.login(username='agente2', password='password123')
+        
+        #Intentamos acceder a la edición de la propiedad de agente1
+        response_edit = self.client.get(reverse('propiedad_update', args=[self.propiedad.pk]))
+        self.assertEqual(response_edit.status_code, 403)
+        
+        #Intentamos enviar un POST para borrar la propiedad de agente1
+        response_delete = self.client.post(reverse('propiedad_delete', args=[self.propiedad.pk]))
+        self.assertEqual(response_delete.status_code, 403)

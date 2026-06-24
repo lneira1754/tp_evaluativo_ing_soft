@@ -103,10 +103,10 @@
                         
                         <div style="display: flex; gap: 8px;">
                             {% if user.is_authenticated %}
-                                {% if user == propiedad.agente or user.is_staff or perms.propiedades.change_propiedad %}
+                                {% if user == propiedad.agente or user.is_staff or user.is_superuser %}
                                     <a href="{% url 'propiedad_update' propiedad.pk %}" class="action-link" title="Editar">✏️ Editar</a>
                                 {% endif %}
-                                {% if user == propiedad.agente or user.is_staff or perms.propiedades.delete_propiedad %}
+                                {% if user == propiedad.agente or user.is_staff or user.is_superuser %}
                                     <a href="{% url 'propiedad_delete' propiedad.pk %}" class="action-link action-link-danger" title="Eliminar">🗑️ Borrar</a>
                                 {% endif %}
                             {% endif %}
